@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spell Check</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <style>
+      body {
+        padding-top: 50px;
+      }
+      .container h2,
+      .container h3,
+      .response .run-time {
+        text-align: center;
+      }
+      .response,
+      .form-check input {
+        margin: 0 auto;
+        max-width: 300px;
+      }
+      .response .run-time {
+        font-size: 29px;
+      }
+      .response .matches li:first-child {
+        background-color: #cfe9ff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">Spell Check</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="form-check">
+        <h2 class="form-check-heading">Enter Word</h2>
+        <input type="text" class="form-control word" required autofocus>
+      </div>
+      <div class="response">
+        <h3>Search Time</h3>
+        <div class="run-time">0.00000000 seconds</div>
+        <h3>Matches</h3>
+        <ul class="list-group matches">
+          <li class="list-group-item">No Matches</li>
+        </ul>
+      </div>
+    </div>
+
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+      var currentWord;
+      $('.word').on('keyup paste input propertychange', function() {
+        var word = $('.word').val();
+        currentWord = word;
+
+        setTimeout(function() {
+          if (word !== currentWord) {
+            return;
+          }
+          if (currentWord === '') {
+            $('.run-time').text('0.00000000 seconds');
+            $('.matches').html($('<li class="list-group-item">').text(
+              'No Matches'));
+          }
+          else {
+            $.ajax({
+              type: 'GET',
+              url: 'check',
+              data: 'q=' + word,
+              success: function(response) {
+                if (word !== currentWord) {
+                  return;
+                }
+                $('.run-time').text(
+                  response['run_time'].toFixed(8) + ' seconds');
+                $('.matches').empty();
+
+                if (!response['matches'].length) {
+                  $('.matches').append($('<li class="list-group-item">').text(
+                    'No Matches'));
+                }
+                else {
+                  for (var i = 0; i < response['matches'].length; i++) {
+                    $('.matches').append(
+                      $('<li class="list-group-item">').text(
+                        response['matches'][i]));
+                  }
+                }
+              },
+            });
+          }
+        }, 50);
+      });
+    </script>
+  </body>
+</html>
